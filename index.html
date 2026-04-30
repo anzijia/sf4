@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全访问跳转中...</title>
+    <style>
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 90%; max-width: 400px; }
+        h2 { color: #333; margin-bottom: 1rem; font-size: 1.25rem; }
+        p { color: #666; font-size: 0.9rem; line-height: 1.5; }
+        
+        /* 进度条容器 */
+        .progress-container { width: 100%; background: #eee; border-radius: 10px; height: 10px; margin: 20px 0; display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); transition: width 0.3s; }
+
+        /* 按钮样式 */
+        .btn { background: #007bff; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s; box-shadow: 0 4px 15px rgba(0,123,255,0.3); }
+        .btn:hover { background: #0056b3; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        
+        .status-text { font-size: 0.8rem; color: #888; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>欢迎访问</h2>
+    <p>为了您的访问安全，请点击下方按钮进入加密通道。系统将自动为您检测最佳线路。</p>
+    
+    <div class="progress-container" id="pContainer">
+        <div class="progress-bar" id="pBar"></div>
+    </div>
+
+    <button class="btn" id="jumpBtn" onclick="startCheck()">立即进入业务网站</button>
+    <div class="status-text" id="statusTip">线路检测待就绪</div>
+</div>
+
+<script>
+    // 这里填写你的业务域名
+    const targetUrl = "https://your-business-domain.com";
+
+    function startCheck() {
+        const btn = document.getElementById('jumpBtn');
+        const container = document.getElementById('pContainer');
+        const bar = document.getElementById('pBar');
+        const tip = document.getElementById('statusTip');
+
+        // UI 状态切换
+        btn.disabled = true;
+        btn.innerText = "正在检测线路...";
+        container.style.display = 'block';
+
+        let progress = 0;
+        
+        // 模拟进度条增加
+        const timer = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.random() * 15;
+                bar.style.width = Math.min(progress, 90) + '%';
+            }
+        }, 200);
+
+        // 核心：使用 fetch 探测域名连通性
+        // mode: 'no-cors' 允许跨域探测（即使对方没开 CORS 也能知道通没通）
+        fetch(targetUrl, { mode: 'no-cors', cache: 'no-cache' })
+        .then(() => {
+            progress = 100;
+            bar.style.width = '100%';
+            tip.innerText = "线路检测成功！正在跳转...";
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 500);
+        })
+        .catch(err => {
+            clearInterval(timer);
+            bar.style.background = '#ff4d4f';
+            tip.innerText = "当前线路拥堵或不可达，请刷新重试。";
+            btn.disabled = false;
+            btn.innerText = "重新尝试";
+        });
+    }
+</script>
+
+</body>
+</html>
